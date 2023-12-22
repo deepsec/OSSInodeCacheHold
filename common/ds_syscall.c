@@ -85,7 +85,7 @@ RETRY_RENAME:
 }
 
 
-int syscall_sleep(long ms)
+int syscall_msleep(long ms)
 {
 	struct timespec ts;
 	int ret;
@@ -106,6 +106,20 @@ int syscall_usleep(long us)
 
 	ts.tv_sec = 0;
 	ts.tv_nsec = (us % 1000000) * 1000;
+	ret = nanosleep(&ts, NULL);
+	if (ret < 0) {
+		err_sys("nanosleep error");
+	}
+	return ret;
+}
+
+int syscall_sleep(long s)
+{
+	struct timespec ts;
+	int ret;
+
+	ts.tv_sec = s % (86400 * 365);
+	ts.tv_nsec = 0;
 	ret = nanosleep(&ts, NULL);
 	if (ret < 0) {
 		err_sys("nanosleep error");
