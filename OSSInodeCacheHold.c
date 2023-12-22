@@ -24,6 +24,7 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
 	struct dirent *dp;
 	struct stat stbuf;
 	char tmp[PATH_MAX] = {0}, vd_orig[64] = {0}, vd_new[64] = {0}, vf_orig[64] = {0}, vf_new[64] = {0};
+	char date_buf[32] = {0};
 
     //dump_pdi_info(pdi);
     //return;
@@ -47,8 +48,8 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
             if (pdi->dirs_total % (1024 * 10) ==  0) {
 				snprintf(vd_orig, sizeof(vd_orig), "%ld", pdi->dirs_total);
 				snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
-                err_msg("thread:%3ld => %-36s dirs_total: %s, files_total: %s, dir_depth[cur:%ld, set:%ld]", pdi->tindex, tmp, 
-						V(vd_orig, vd_new), V(vf_orig, vf_new), dir_depth, pdi->dir_depth);
+                err_msg("thread:%3ld => %-36s dirs_total: %s, files_total: %s, dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, tmp, 
+						V(vd_orig, vd_new), V(vf_orig, vf_new), dir_depth, pdi->dir_depth, datetime_now(date_buf));
             }
             if (dir_depth >= pdi->dir_depth) {
                 //return;
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
     pthread_t   add_tid[MAX_PTHREAD_NUM] = {0};
 	long pthread_num, dir_depth, interval, top_interval;
     int i, opt, work_times;
-    char tmpdir[PATH_MAX] = {0};
+    char tmpdir[PATH_MAX] = {0}, date_buf[32] = {0};
 
 	pthread_num = DEFAULT_PTHREAD_NUM;
     dir_depth = 0;
@@ -183,7 +184,7 @@ int main(int argc, char *argv[])
 				free(pdi->initial_dir);
 			}
 		}
-		err_msg("\nfinished '%d' work, go on at %ld seconds ...\n", ++work_times, top_interval);
+		err_msg("\nfinished '%d' work at [%s], will go on after %ld seconds ...\n", ++work_times, datetime_now(date_buf), top_interval);
 		syscall_sleep(top_interval);
 	}		
 	err_msg ("finished all work!");

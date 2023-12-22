@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include "ds_common.h"
 #include "ds_err.h"
 
@@ -79,4 +81,21 @@ char *V(char *d, char *r)
 	/* replace the last ',' to '\0' */
 	*(pr-1) = '\0';
 	return r;
+}
+
+char *datetime_now(char *buf)
+{
+	struct timeval tv = {0};
+	char *datetime = NULL;
+
+	if (buf == NULL) {
+		return NULL;
+	}
+	if (gettimeofday(&tv, NULL) < 0) {
+		err_sys("gettimeofday() error");
+	}	
+	datetime = ctime_r(&tv.tv_sec, buf);
+	datetime[strlen(datetime) - 1] = '\0';
+
+	return datetime;
 }

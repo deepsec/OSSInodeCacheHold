@@ -13,7 +13,7 @@ struct pthread_dir_info {
 
 #define OSS_DATA_DIR_PREFIX				"/srv/node/d"
 #define DEFAULT_DIR_DEPTH	 			3
-#define MAX_DIR_DEPTH					4
+#define MAX_DIR_DEPTH					6
 #define MAX_PTHREAD_NUM					36
 #define DEFAULT_PTHREAD_NUM				12
 #define DEFAULT_INTERVAL_USECS			200
