@@ -197,6 +197,7 @@ int main(int argc, char *argv[])
 		cost_time = tv_now.tv_sec - tv_last.tv_sec;
 		err_msg("\nfinished the '%d' work at [%s], cost: %d seconds, will go on after %ld seconds ...\n", ++work_times, datetime_now(date_buf), cost_time, top_interval);
 		syscall_sleep(top_interval);
+		tv_now.tv_sec += top_interval;
 	}		
 	err_msg ("finished all work!");
 	
