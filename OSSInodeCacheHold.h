@@ -16,7 +16,7 @@ struct pthread_dir_info {
 #define MAX_DIR_DEPTH					6
 #define MAX_PTHREAD_NUM					36
 #define DEFAULT_PTHREAD_NUM				12
-#define DEFAULT_INTERVAL_USECS			200
+#define DEFAULT_INTERVAL_USECS			500
 #define DEFAULT_TOPLEVEL_INTERVAL_SECS	1200
 
 

@@ -48,7 +48,7 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
             if (pdi->dirs_total % (1024 * 10) ==  0) {
 				snprintf(vd_orig, sizeof(vd_orig), "%ld", pdi->dirs_total);
 				snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
-                err_msg("thread:%3ld => %-36s dirs_total: %s, files_total: %s, dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, tmp, 
+                err_msg("thread:%3ld => %-36s dirs_total: %s  files_total: %s  dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, tmp, 
 						V(vd_orig, vd_new), V(vf_orig, vf_new), dir_depth, pdi->dir_depth, datetime_now(date_buf));
             }
             if (dir_depth >= pdi->dir_depth) {
