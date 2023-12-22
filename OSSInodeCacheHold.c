@@ -118,9 +118,10 @@ int main(int argc, char *argv[])
 	struct pthread_dir_info  pdi_array[MAX_PTHREAD_NUM] = {{0},}, *pdi;
     pthread_t   add_tid[MAX_PTHREAD_NUM] = {0};
 	long pthread_num, dir_depth, interval, top_interval;
-    int i, opt, work_times;
+    int i, opt, work_times, cost_time;
     char tmpdir[PATH_MAX] = {0}, date_buf[32] = {0};
-
+	struct timeval tv_last = {0}, tv_now = {0};
+	
 	pthread_num = DEFAULT_PTHREAD_NUM;
     dir_depth = 0;
     interval = DEFAULT_INTERVAL_USECS;
@@ -160,8 +161,12 @@ int main(int argc, char *argv[])
     }
 	print_original_cmdline(argc, argv);
 	err_msg("%s: pthread_num: [%ld], interval:[%ld], top_interval:[%ld], dir_depth:[%ld]", argv[0], pthread_num, interval, top_interval, dir_depth);
+
+	if (gettimeofday(&tv_now, NULL) < 0) {
+		err_sys("gettimeofday() error");
+	}
 	work_times = 0;
-	while (1) {    
+	while (1) { 
 		for (i = 0, pdi = pdi_array; i < pthread_num; i++, pdi++) {	
 			pdi->tsum = pthread_num;	
 			pdi->tindex = i;
@@ -184,7 +189,13 @@ int main(int argc, char *argv[])
 				free(pdi->initial_dir);
 			}
 		}
-		err_msg("\nfinished '%d' work at [%s], will go on after %ld seconds ...\n", ++work_times, datetime_now(date_buf), top_interval);
+
+		tv_last = tv_now;
+		if (gettimeofday(&tv_now, NULL) < 0) {
+			err_sys("gettimeofday() error");
+		}
+		cost_time = tv_now.tv_sec - tv_last.tv_sec;
+		err_msg("\nfinished the '%d' work at [%s], cost: %d seconds, will go on after %ld seconds ...\n", ++work_times, datetime_now(date_buf), cost_time, top_interval);
 		syscall_sleep(top_interval);
 	}		
 	err_msg ("finished all work!");
