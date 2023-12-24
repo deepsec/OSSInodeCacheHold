@@ -52,7 +52,7 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
 				snprintf(vd_orig, sizeof(vd_orig), "%ld", pdi->dirs_total);
 				snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
 				snprintf(vl_orig, sizeof(vl_orig), "%ld", pdi->last_total);
-				err_msg("thread:%3ld => P: %-40s dirs_total: %s  files_total: %s  last_total: %s  dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, dir,
+				err_msg("thread:%3ld => Parent: %-36s dirs_total: %s  files_total: %s  last_total: %s  dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, dir,
 						V(vd_orig, vd_new), V(vf_orig, vf_new), V(vl_orig, vl_new), dir_depth, pdi->dir_depth, datetime_now(date_buf));
 			}			
 			continue;
