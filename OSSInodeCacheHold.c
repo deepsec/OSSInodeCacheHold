@@ -22,9 +22,10 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
 	DIR *dirp;
 	struct dirent *dp;
 	struct stat stbuf;
-	char tmp[PATH_MAX + 1] = { 0 }, vd_orig[64] = { 0 }, vd_new[64] = { 0 }, vf_orig[64] = { 0 }, vf_new[64] = { 0 };
+	char tmp[PATH_MAX + 1] = { 0 };
+	char vd_orig[64] = { 0 }, vd_new[64] = { 0 }, vf_orig[64] = { 0 }, vf_new[64] = { 0 }, vl_orig[64] = { 0 }, vl_new[64] = { 0 };
 	char date_buf[32] = { 0 };
-
+	
 	//dump_pdi_info(pdi);
 	//return;
 
@@ -42,23 +43,31 @@ void recursive_dir(const char *dir, struct pthread_dir_info *pdi, long dir_depth
 		if (pdi->all_delay == 1) {
 			syscall_usleep(pdi->usecs);
 		}
+		/* the last level, no lstat(), no open() close() syscall, and no metadata from disk into memory, 
+		 * so cannot distinguish DIR or FILE
+		 */
+		if (dir_depth >= pdi->dir_depth) {
+			pdi->last_total++;					
+			if (pdi->last_total % (1024 * 100) == 0) {
+				snprintf(vd_orig, sizeof(vd_orig), "%ld", pdi->dirs_total);
+				snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
+				snprintf(vl_orig, sizeof(vl_orig), "%ld", pdi->last_total);
+				err_msg("thread:%3ld => P: %-40s dirs_total: %s  files_total: %s  last_total: %s  dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, dir,
+						V(vd_orig, vd_new), V(vf_orig, vf_new), V(vl_orig, vl_new), dir_depth, pdi->dir_depth, datetime_now(date_buf));
+			}			
+			continue;
+		}
 		if (lstat(tmp, &stbuf) < 0) {
 			err_msg("lstat(%s) error", tmp);
 			continue;
 		}
 		if (S_ISDIR(stbuf.st_mode)) {
-			pdi->dirs_total++;
-			if (pdi->dirs_total % (1024 * 10) == 0) {
-				snprintf(vd_orig, sizeof(vd_orig), "%ld", pdi->dirs_total);
-				snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
-				err_msg("thread:%3ld => %-68s dirs_total: %s  files_total: %s  dir_depth[cur:%ld, set:%ld]   %s", pdi->tindex, tmp,
-						V(vd_orig, vd_new), V(vf_orig, vf_new), dir_depth, pdi->dir_depth, datetime_now(date_buf));
+			pdi->dirs_total++;			
+			if (pdi->all_delay == 0) {
+				syscall_usleep(pdi->usecs);
 			}
 			if (dir_depth >= pdi->dir_depth) {
 				continue;
-			}
-			if (pdi->all_delay == 0) {
-				syscall_usleep(pdi->usecs);
 			}
 			recursive_dir(tmp, pdi, dir_depth + 1);
 			continue;
@@ -100,7 +109,7 @@ void print_original_cmdline(int argc, char **argv)
 
 void dump_pdi_info(struct pthread_dir_info *pdi)
 {
-	char vd_orig[128] = { 0 }, vd_new[128] = { 0 }, vf_orig[128] = { 0 }, vf_new[128] = { 0 };
+	char vd_orig[64] = { 0 }, vd_new[64] = { 0 }, vf_orig[64] = { 0 }, vf_new[64] = { 0 }, vl_orig[64] = { 0 }, vl_new[64] = { 0 };
 	if (pdi == NULL) {
 		return;
 	}
@@ -112,6 +121,8 @@ void dump_pdi_info(struct pthread_dir_info *pdi)
 	printf("pdi->dirs_total: %s\n", V(vd_orig, vd_new));
 	snprintf(vf_orig, sizeof(vf_orig), "%ld", pdi->files_total);
 	printf("pdi->files_total: %s\n", V(vf_orig, vf_new));
+	snprintf(vl_orig, sizeof(vl_orig), "%ld", pdi->last_total);
+	printf("pdi->last_total: %s\n", V(vl_orig, vl_new));
 	printf("pdi->dir_depth: %ld\n", pdi->dir_depth);
 	printf("pdi->all_delay: %d\n", pdi->all_delay);
 	printf("pdi->usecs: %ld\n", pdi->usecs);
@@ -180,6 +191,7 @@ int main(int argc, char *argv[])
 			pdi->tindex = i;
 			pdi->files_total = 0;
 			pdi->dirs_total = 0;
+			pdi->last_total = 0;
 			pdi->dir_depth = dir_depth;
 			pdi->all_delay = all_delay;
 			pdi->usecs = interval;

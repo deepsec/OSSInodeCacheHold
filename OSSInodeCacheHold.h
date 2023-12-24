@@ -9,6 +9,7 @@ struct pthread_dir_info {
 	int all_delay;
 	long dirs_total;
 	long files_total;
+	long last_total;
 	long usecs;
 };
 
