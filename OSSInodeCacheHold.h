@@ -6,6 +6,7 @@ struct pthread_dir_info {
 	long tindex;
 	char *initial_dir;
 	long dir_depth;
+	int all_delay;
 	long dirs_total;
 	long files_total;
 	long usecs;
@@ -16,7 +17,7 @@ struct pthread_dir_info {
 #define MAX_DIR_DEPTH					6
 #define MAX_PTHREAD_NUM					36
 #define DEFAULT_PTHREAD_NUM				12
-#define DEFAULT_INTERVAL_USECS			100
+#define DEFAULT_INTERVAL_USECS			200
 #define DEFAULT_TOPLEVEL_INTERVAL_SECS	1200
 
 
